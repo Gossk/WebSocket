@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat WebSocket</title>
+  <title>WebSocket Simple</title>
 </head>
 <body>
-    <h2>Chat en tiempo real</h2>
-    <input type="text" id="messageInput" placeholder="Escribe un mensaje">
-    <button onclick="sendMessage()">Enviar</button>
-    <ul id="messages"></ul>
+  <h2>Chat simple</h2>
+  <input id="msg" placeholder="Escribe algo">
+  <button onclick="send()">Enviar</button>
+  <ul id="chat"></ul>
 
-    <script>
-        const socket = new WebSocket("ws://localhost:8080");
+  <script>
+    const socket = new WebSocket(
+      location.origin.replace("http", "ws")
+    );
 
-        socket.onopen = () => {
-            console.log("Conectado al servidor");
-        };
+    socket.onmessage = (event) => {
+      const li = document.createElement("li");
+      li.textContent = event.data;
+      document.getElementById("chat").appendChild(li);
+    };
 
-        socket.onmessage = (event) => {
-            const li = document.createElement("li");
-            li.textContent = event.data;
-            document.getElementById("messages").appendChild(li);
-        };
-
-        function sendMessage() {
-            const input = document.getElementById("messageInput");
-            socket.send(input.value);
-            input.value = "";
-        }
-    </script>
+    function send() {
+      const input = document.getElementById("msg");
+      socket.send(input.value);
+      input.value = "";
+    }
+  </script>
 </body>
 </html>

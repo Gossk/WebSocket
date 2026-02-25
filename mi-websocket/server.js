@@ -1,23 +1,29 @@
-const WebSocket = require('ws');
+const express = require("express");
+const http = require("http");
+const WebSocket = require("ws");
 
-const server = new WebSocket.Server({ port: 8080 });
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-server.on('connection', (socket) => {
-    console.log('Cliente conectado');
+// Servir archivos estáticos
+app.use(express.static("public"));
 
-    socket.on('message', (message) => {
-        console.log('Mensaje recibido:', message.toString());
+// WebSocket
+wss.on("connection", (ws) => {
+  console.log("Cliente conectado");
 
-        server.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message.toString());
-            }
-        });
+  ws.on("message", (message) => {
+    // reenviar mensaje a todos
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message.toString());
+      }
     });
-
-    socket.on('close', () => {
-        console.log('Cliente desconectado');
-    });
+  });
 });
 
-console.log('Servidor WebSocket corriendo en ws://localhost:8080');
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log("Servidor corriendo en puerto " + PORT);
+});
